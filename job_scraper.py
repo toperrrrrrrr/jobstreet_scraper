@@ -1,5 +1,3 @@
-# job_scraper.py
-
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -10,9 +8,7 @@ import logging
 logging.basicConfig(filename='job_scraper.log', level=logging.INFO, 
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
-def scrape_jobs(keyword, classification):
-    url = f"https://www.jobstreet.com.my/en/job-search/job-vacancy.php?key={keyword}&specialization={classification}"
-    
+def scrape_jobs(url):
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -22,18 +18,21 @@ def scrape_jobs(keyword, classification):
     
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    jobs = []
-    job_cards = soup.find_all('div', class_='sx2jih0 zcydq85u zcydq8eu')
-    
+    # Using the class you found for the job cards
+    job_cards = soup.find_all('div', class_='_4603vi0 _9l8a1v4u _9l8a1v50')
+
     if not job_cards:
         logging.warning("No job cards found. Check the HTML structure.")
         return None
 
+    jobs = []
+
     for job in job_cards:
         try:
-            title = job.find('div', class_='sx2jih0 zcydq86u').text.strip()
-            company = job.find('span', class_='sx2jih0 zcydq86q zcydq89v').text.strip()
-            location = job.find('span', class_='sx2jih0 zcydq86q zcydq87p').text.strip()
+            # Example selectors; update these based on your inspection
+            title = job.find('h1').text.strip()  # Update with the correct tag/class
+            company = job.find('div', class_='sx2jih0').text.strip()  # Example, replace with actual
+            location = job.find('span', class_='sx2jih0').text.strip()  # Example, replace with actual
 
             jobs.append({
                 'title': title,
@@ -58,11 +57,10 @@ def save_to_db(jobs, db_name):
     logging.info(f"Saved {len(jobs)} jobs to the database {db_name}")
 
 if __name__ == "__main__":
-    keyword = "software engineer"
-    classification = "123"  # Replace with a valid classification ID
+    url = "https://www.jobstreet.com.ph/EMAPTA-jobs/at-this-company"
 
-    jobs = scrape_jobs(keyword, classification)
+    jobs = scrape_jobs(url)
 
     if jobs:
-        save_to_csv(jobs, 'job_listings.csv')
-        save_to_db(jobs, 'jobs.db')
+        save_to_csv(jobs, 'emapta_job_listings.csv')
+        save_to_db(jobs, 'emapta_jobs.db')
