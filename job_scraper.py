@@ -18,7 +18,7 @@ def scrape_jobs(url):
     
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    # Using the class you found for the job cards
+    # Using the class you provided for the job cards
     job_cards = soup.find_all('div', class_='_4603vi0 _9l8a1v4u _9l8a1v50')
 
     if not job_cards:
@@ -29,17 +29,26 @@ def scrape_jobs(url):
 
     for job in job_cards:
         try:
-            # Example selectors; update these based on your inspection
-            title = job.find('h1').text.strip()  # Update with the correct tag/class
-            company = job.find('div', class_='sx2jih0').text.strip()  # Example, replace with actual
-            location = job.find('span', class_='sx2jih0').text.strip()  # Example, replace with actual
+            # Look inside the anchor tag or its siblings for the relevant data
+            title_element = job.find('a', class_='_4603vi0 _4603vif _9l8a1v5i _9l8a1vj')  # Placeholder class for the title
+            title = title_element.text.strip() if title_element else "N/A"
+
+            # Locate the job title within sibling elements if not in the anchor tag itself
+            # Look for other classes or elements containing company name and location
+
+            # Example: Adjust based on actual HTML structure you see
+            company_element = job.find('span', class_='_9l8a1vk')  # Adjust class as needed
+            company = company_element.text.strip() if company_element else "N/A"
+
+            location_element = job.find('span', class_='_9l8a1vm')  # Adjust class as needed
+            location = location_element.text.strip() if location_element else "N/A"
 
             jobs.append({
                 'title': title,
                 'company': company,
                 'location': location,
             })
-        except AttributeError as e:
+        except Exception as e:
             logging.error(f"Error parsing a job card: {e}")
             continue
 
